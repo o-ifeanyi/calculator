@@ -16,12 +16,15 @@ void main() {
 
     await tester.tap(find.byKey(Key('5')));
     await tester.tap(find.byKey(Key('0')));
+    await tester.pump();
+
+    expect(find.text('38 - 50'), findsOneWidget, reason: 'displayText = 38 - 50');
+    expect(find.text('-12.0'), findsOneWidget, reason: 'result value');
 
     await tester.tap(find.byKey(Key('=')));
     await tester.pump();
 
-    expect(find.text('38 - 50'), findsOneWidget, reason: 'displayText = 38 - 50');
-    expect(find.text('-12'), findsOneWidget, reason: 'result value');
+    expect(find.text('-12.0'), findsOneWidget, reason: 'result value');
   });
 
   testWidgets('number buttons / multiplication test', (WidgetTester tester) async {
@@ -30,15 +33,18 @@ void main() {
     
     await tester.tap(find.byKey(Key('8')));
 
-    await tester.tap(find.byKey(Key('×')));
+    await tester.tap(find.byKey(Key('*')));
 
     await tester.tap(find.byKey(Key('5')));
+    await tester.pump();
+
+    expect(find.text('8 * 5'), findsOneWidget, reason: 'displayText = 8 * 5');
+    expect(find.text('40.0'), findsOneWidget, reason: 'result value');
 
     await tester.tap(find.byKey(Key('=')));
     await tester.pump();
 
-    expect(find.text('8 × 5'), findsOneWidget, reason: 'displayText = 8 × 5');
-    expect(find.text('40'), findsOneWidget, reason: 'result value');
+    expect(find.text('40.0'), findsOneWidget, reason: 'result value');
   });
 
   testWidgets('number buttons / addition test', (WidgetTester tester) async {
@@ -52,12 +58,15 @@ void main() {
 
     await tester.tap(find.byKey(Key('2')));
     await tester.tap(find.byKey(Key('5')));
+    await tester.pump();
+
+    expect(find.text('55 + 25'), findsOneWidget, reason: 'displayText = 55 + 25');
+    expect(find.text('80.0'), findsOneWidget, reason: 'result value');
 
     await tester.tap(find.byKey(Key('=')));
     await tester.pump();
 
-    expect(find.text('55 + 25'), findsOneWidget, reason: 'displayText = 55 + 25');
-    expect(find.text('80'), findsOneWidget, reason: 'result value');
+    expect(find.text('80.0'), findsOneWidget, reason: 'result value');
   });
 
   testWidgets('number buttons / division test', (WidgetTester tester) async {
@@ -67,25 +76,26 @@ void main() {
     await tester.tap(find.byKey(Key('5')));
     await tester.tap(find.byKey(Key('0')));
 
-    await tester.tap(find.byKey(Key('÷')));
+    await tester.tap(find.byKey(Key('/')));
 
     await tester.tap(find.byKey(Key('5')));
-
-    await tester.tap(find.byKey(Key('=')));
     await tester.pump();
 
-    expect(find.text('50 ÷ 5'), findsOneWidget, reason: 'displayText = 50 ÷ 5');
+    expect(find.text('50 / 5'), findsOneWidget, reason: 'displayText = 50 / 5');
     expect(find.text('10.0'), findsOneWidget, reason: 'result value');
 
-    await tester.tap(find.byKey(Key('÷')));
+    await tester.tap(find.byKey(Key('=')));
+    await tester.pump();
 
-    await tester.tap(find.byKey(Key('2')));
+    expect(find.text('10.0'), findsOneWidget, reason: 'result value');
+
+    await tester.tap(find.byKey(Key('/')));
+    await tester.tap(find.byKey(Key('4')));
 
     await tester.tap(find.byKey(Key('=')));
     await tester.pump();
 
-    expect(find.text('50 ÷ 5 ÷ 2'), findsOneWidget, reason: 'displayText = 50 ÷ 5 ÷ 2');
-    expect(find.text('5.0'), findsOneWidget, reason: 'result value');
+    expect(find.text('2.5'), findsOneWidget, reason: 'result value');
   });
 
   testWidgets('number buttons / all clear test', (WidgetTester tester) async {
@@ -102,10 +112,35 @@ void main() {
     await tester.pump();
 
     expect(find.text('31 - 74'), findsOneWidget, reason: 'displayText = 31 - 74');
+    expect(find.text('-43.0'), findsOneWidget, reason: 'result value');
 
     await tester.tap(find.byKey(Key('AC')));
     await tester.pump();
 
     expect(find.text('31 - 74'), findsNothing, reason: 'displayText = ');
+    expect(find.text('-43.0'), findsNothing, reason: 'result value');
+  });
+
+  testWidgets('number buttons / delete button test', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(MyApp());
+    
+    await tester.tap(find.byKey(Key('3')));
+    await tester.tap(find.byKey(Key('8')));
+
+    await tester.tap(find.byKey(Key('-')));
+
+    await tester.tap(find.byKey(Key('5')));
+    await tester.tap(find.byKey(Key('0')));
+    await tester.pump();
+
+    expect(find.text('38 - 50'), findsOneWidget, reason: 'displayText = 38 - 50');
+    expect(find.text('-12.0'), findsOneWidget, reason: 'result value');
+
+    await tester.tap(find.byKey(Key('D')));
+    await tester.pump();
+
+    expect(find.text('38 - 5'), findsOneWidget, reason: 'displayText = 38 - 5');
+    expect(find.text('33.0'), findsOneWidget, reason: 'result value');
   });
 }

@@ -8,7 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print('history');
     return Scaffold(
       body: SafeArea(
         child: Column(

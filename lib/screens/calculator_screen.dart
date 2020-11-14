@@ -5,6 +5,7 @@ import 'package:calculator/util/config.dart';
 import 'package:calculator/widgets/calc_button.dart';
 import 'package:calculator/widgets/rounded_button.dart';
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum Operand {
@@ -22,98 +23,96 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   String displayText = '';
   String result = '';
-  num firstNum;
-  num secondNum;
-  num prevValue;
+  String prevValue;
   Operand operand;
+  Operand prevOperand;
 
   void clear() {
     setState(() {
       displayText = '';
       result = '';
-      firstNum = null;
-      secondNum = null;
-      prevValue = null;
+      prevValue = '';
       operand = null;
+      prevOperand = null;
     });
   }
 
-  void delete() {}
+  void delete() {
+    setState(() {
+      // delete the last entry and remove any trailing space
+      displayText =
+          displayText.substring(0, displayText.length - 1).trimRight();
+      // no need to call evaluate if theres not a second value
+      if (displayText.endsWith('+') ||
+          displayText.endsWith('-') ||
+          displayText.endsWith('*') ||
+          displayText.endsWith('/')) return;
+      if (displayText.isEmpty) return;
+      evaluate();
+    });
+  }
 
   void assignNum(var number) {
-    if ((firstNum == null) && number == '.') {
-      return;
-    }
-    if ((operand != null && secondNum == null) && number == '.') {
-      return;
-    }
-    if (number == '.') {
-      setState(() {
-        displayText += '$number';
-      });
-      return;
-    }
+    // each entry cannot contain more than one decimal point
+    if (displayText.split(RegExp(r'\s.{1}\s')).last.contains('.') &&
+        number == '.') return;
+    // the first entry cannot be a decimal
+    if (displayText.isEmpty && number == '.') return;
     setState(() {
-      (firstNum == null || operand == null) && prevValue == null
-          ? firstNum = displayText.endsWith('.')
-              ? num.parse(('${firstNum ?? ''}')) + num.parse('.$number')
-              : num.parse('${firstNum ?? ''}$number')
-          : secondNum = displayText.endsWith('.')
-              ? num.parse(('${secondNum ?? ''}')) + num.parse('.$number')
-              : num.parse('${secondNum ?? ''}$number');
       displayText += '$number';
     });
+    // no need to call evaluate if last entry was a decimal
+    if (number == '.') return;
+    if (operand != null || prevOperand != null) {
+      evaluate();
+    }
   }
 
-  Future<void> evaluate() async {
-    if (secondNum == null || secondNum.toString().endsWith('.')) return;
-    switch (operand) {
-      case Operand.Add:
-        result = ((prevValue ?? firstNum) + secondNum).toString();
-        break;
-      case Operand.Divide:
-        result = ((prevValue ?? firstNum) / secondNum).toString();
-        break;
-      case Operand.Multiply:
-        result = ((prevValue ?? firstNum) * secondNum).toString();
-        break;
-      case Operand.Subtract:
-        result = ((prevValue ?? firstNum) - secondNum).toString();
-        break;
-      default:
+  Future<void> evaluate({bool isTaped = false}) async {
+    Parser p = Parser();
+    ContextModel cm = ContextModel();
+    Expression exp = p.parse(displayText);
+    result = exp.evaluate(EvaluationType.REAL, cm).toString();
+    if (isTaped) {
+      await SharedPreferences.getInstance().then((pref) {
+        final history = pref.getStringList('history') ?? [];
+        history.add(json.encode({
+          'equation': displayText,
+          'result': result,
+        }));
+        pref.setStringList('history', history);
+      });
     }
     setState(() {
+      prevOperand = operand;
       operand = null;
-      secondNum = null;
-      firstNum = null;
-      prevValue = double.parse(result);
-    });
-    await SharedPreferences.getInstance().then((pref) {
-      final history = pref.getStringList('history') ?? [];
-      history.add(json.encode({
-        'equation': displayText,
-        'result': result,
-      }));
-      pref.setStringList('history', history);
+      prevValue = result;
+      // if equal to button is tapped displayText resets to current total
+      // and result resets to empty string
+      isTaped ? displayText = prevValue : displayText = displayText;
+      isTaped ? result = '' : result = result;
     });
   }
 
   void assignOperand(Operand option) {
+    // operands have trailing spaces so if display text ends with a space
+    // the last thing that was entered is an operand and should therefore not add another
     if (displayText.endsWith(' ')) return;
     switch (option) {
       case Operand.Add:
         displayText += ' + ';
         break;
       case Operand.Divide:
-        displayText += ' ÷ ';
+        displayText += ' / ';
         break;
       case Operand.Multiply:
-        displayText += ' × ';
+        displayText += ' * ';
         break;
       case Operand.Subtract:
         displayText += ' - ';
         break;
       default:
+        throw Error();
     }
     setState(() {
       operand = option;
@@ -193,8 +192,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           text: 'AC',
                           callBack: clear,
                         ),
-                        ...['D', '×'].map((e) {
-                          if (e == '×') {
+                        ...['D', '*'].map((e) {
+                          if (e == '*') {
                             return CalcButton(
                               key: Key(e),
                               text: e,
@@ -212,8 +211,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: ['7', '8', '9', '÷'].map((e) {
-                        if (e == '÷') {
+                      children: ['7', '8', '9', '/'].map((e) {
+                        if (e == '/') {
                           return CalcButton(
                             key: Key(e),
                             text: e,
@@ -278,7 +277,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               key: Key(e),
                               text: e,
                               color: Colors.green,
-                              callBack: () async => await evaluate(),
+                              callBack: () async =>
+                                  await evaluate(isTaped: true),
                             );
                           }
                           return CalcButton(
