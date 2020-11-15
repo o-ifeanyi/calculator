@@ -25,15 +25,17 @@ class HistoryScreen extends StatelessWidget {
                     icon: Icon(Icons.clear),
                     onPressed: () => showDialog(
                         context: (context),
-                        builder: (ctx) => AlertDialog(
+                        builder: (context) => AlertDialog(
                               backgroundColor: Theme.of(context).primaryColor,
                               title: Text('Clear history?'),
                               actions: [
                                 FlatButton(
-                                  onPressed: () => Navigator.pop(ctx),
+                                  key: Key('dismiss'),
+                                  onPressed: () => Navigator.pop(context),
                                   child: Text('Dismiss'),
                                 ),
                                 FlatButton(
+                                  key: Key('clear'),
                                   onPressed: () async {
                                     await SharedPreferences.getInstance()
                                         .then((pref) => pref.clear());
