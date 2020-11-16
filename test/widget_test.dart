@@ -1,8 +1,10 @@
+import 'package:calculator/provider/calculator.dart';
 import 'package:calculator/screens/history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:calculator/main.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -157,8 +159,11 @@ void main() {
   });
 
   Widget makeTestatble(Widget child) {
-    return MaterialApp(
-      home: child,
+    return ChangeNotifierProvider(
+      create: (ctx) => Calculator(),
+      child: MaterialApp(
+        home: child,
+      ),
     );
   }
 
@@ -179,8 +184,8 @@ void main() {
           [];
 
       if (history.isEmpty) {
-        expect(find.byIcon(Icons.history), findsOneWidget);
-        expect(find.text('No history'), findsOneWidget);
+        expect(find.byKey(Key('empty')), findsOneWidget);
+        expect(find.byKey(Key('not empty')), findsNothing);
       }
     });
 
@@ -191,10 +196,13 @@ void main() {
       final history = await SharedPreferences.getInstance()
               .then((pref) => pref.getStringList('history')) ??
           [];
+      // print(history);
+
+      print(history);
 
       if (history.isNotEmpty) {
-        expect(find.byIcon(Icons.history), findsNothing);
-        expect(find.text('No history'), findsNothing);
+        expect(find.byKey(Key('empty')), findsNothing);
+        expect(find.byKey(Key('not empty')), findsOneWidget);
       }
     });
   });

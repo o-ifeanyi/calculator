@@ -4,13 +4,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class Calculator extends ChangeNotifier {
   String displayText = '';
   String result = '';
   String prevValue = '';
   String operand = '';
   String prevOperand = '';
+  List<String> history = [];
 
   void clear() {
     displayText = '';
@@ -83,6 +83,19 @@ class Calculator extends ChangeNotifier {
     displayText += option;
 
     operand = option;
+    notifyListeners();
+  }
+
+  Future<void> getHistory() async {
+    history = await SharedPreferences.getInstance().then(
+      (pref) => pref.getStringList('history') ?? [],
+    );
+    notifyListeners();
+  }
+
+  Future<void> clearHistory() async {
+    await SharedPreferences.getInstance().then((pref) => pref.clear());
+    history = [];
     notifyListeners();
   }
 }

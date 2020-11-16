@@ -21,6 +21,9 @@ void main() {
   test('clear function should reset all values', () {
     final calculator = Calculator();
 
+    expect(calculator.displayText, '');
+    expect(calculator.result, '');
+
     calculator.assignNum('2');
     calculator.assignNum('0');
 
