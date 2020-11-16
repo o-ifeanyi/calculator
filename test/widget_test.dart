@@ -184,26 +184,23 @@ void main() {
           [];
 
       if (history.isEmpty) {
-        expect(find.byKey(Key('empty')), findsOneWidget);
-        expect(find.byKey(Key('not empty')), findsNothing);
+        expect(find.byIcon(Icons.history), findsOneWidget);
+        expect(find.text('No history'), findsOneWidget);
       }
     });
 
-    testWidgets('History screen is not empty', (WidgetTester tester) async {
-      // Build our app and trigger a frame.
-      await tester.pumpWidget(makeTestatble(HistoryScreen()));
+    // testWidgets('History screen is not empty', (WidgetTester tester) async {
+    //   // Build our app and trigger a frame.
+    //   await tester.pumpWidget(makeTestatble(HistoryScreen()));
 
-      final history = await SharedPreferences.getInstance()
-              .then((pref) => pref.getStringList('history')) ??
-          [];
-      // print(history);
+    //   final history = await SharedPreferences.getInstance()
+    //           .then((pref) => pref.getStringList('history')) ??
+    //       [];
 
-      print(history);
-
-      if (history.isNotEmpty) {
-        expect(find.byKey(Key('empty')), findsNothing);
-        expect(find.byKey(Key('not empty')), findsOneWidget);
-      }
-    });
+    //   if (history.isNotEmpty) {
+    //     expect(find.byIcon(Icons.history), findsNothing);
+    //     expect(find.text('No history'), findsNothing);
+    //   }
+    // });
   });
 }

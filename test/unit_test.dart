@@ -2,7 +2,6 @@ import 'package:calculator/provider/calculator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   test('assign function should update display text', () {
     final calculator = Calculator();
 
@@ -163,4 +162,29 @@ void main() {
     expect(calculator.operand, '',
         reason: 'evaluate is called and operand is reset');
   });
+
+  test('getHistory sould update the history list', () async{
+    final calculator = Calculator();
+
+    expect(calculator.history.isEmpty, true);
+
+    await calculator.getHistory();
+
+    expect(calculator.history.isEmpty, false);
+  });
+
+  test('clearHistory sould empty the history list', () async{
+    final calculator = Calculator();
+
+    expect(calculator.history.isEmpty, true);
+
+    await calculator.getHistory();
+
+    expect(calculator.history.isEmpty, false);
+
+    await calculator.clearHistory();
+
+    expect(calculator.history.isEmpty, true);
+  });
+
 }
