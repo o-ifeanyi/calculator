@@ -1,10 +1,12 @@
 import 'package:calculator/provider/calculator.dart';
 import 'package:calculator/screens/history_screen.dart';
 import 'package:calculator/util/config.dart';
+import 'package:calculator/util/theme.dart';
 import 'package:calculator/widgets/calc_button.dart';
 import 'package:calculator/widgets/rounded_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CalculatorScreen extends StatelessWidget {
   @override
@@ -15,17 +17,32 @@ class CalculatorScreen extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              IconButton(
-                  key: Key('history icon'),
-                  icon: Icon(Icons.history),
-                  onPressed: () {
-                    calc.getHistory();
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HistoryScreen(),
-                        ));
-                  }),
+              Row(
+                children: [
+                  Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.color_lens),
+                    onPressed: () async {
+                      await SharedPreferences.getInstance().then((pref) {
+                        final isDark = pref.getBool('isDark') ?? false;
+                        calc.setTheme(isDark ? kLightTheme : kDarktTheme);
+                        pref.setBool('isDark', !isDark);
+                      });
+                    },
+                  ),
+                  IconButton(
+                      key: Key('history icon'),
+                      icon: Icon(Icons.history),
+                      onPressed: () {
+                        calc.getHistory();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => HistoryScreen(),
+                            ));
+                      }),
+                ],
+              ),
               SizedBox(
                 height: Config.yMargin(context, 3),
               ),

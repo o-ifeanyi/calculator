@@ -1,10 +1,19 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Calculator extends ChangeNotifier {
+  Calculator({this.theme});
+
+  void setTheme(ThemeData themeData) {
+    theme = themeData;
+    notifyListeners();
+  }
+
+  ThemeData theme;
   String displayText = '';
   String result = '';
   String prevValue = '';

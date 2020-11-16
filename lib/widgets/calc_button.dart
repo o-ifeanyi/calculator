@@ -9,7 +9,7 @@ class CalcButton extends StatelessWidget {
   CalcButton({
     this.key,
     @required this.text,
-    this.color = const Color(0xFF222427),
+    this.color,
     @required this.callBack,
   }) : super(key: key);
   @override
@@ -23,7 +23,7 @@ class CalcButton extends StatelessWidget {
         width: Config.yMargin(context, 9),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-          color: color
+          color: color ?? Theme.of(context).buttonColor
         ),
         child: Text(
           text,
